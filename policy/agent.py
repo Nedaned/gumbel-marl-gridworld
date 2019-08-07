@@ -4,9 +4,10 @@ from misc.replay_buffer import ReplayBuffer
 
 
 class Agent(PolicyBase):
-    def __init__(self, env, tb_writer, log, args, name):
+    def __init__(self, env, tb_writer, log, args, name, i_agent):
         super(Agent, self).__init__(
-            env=env, log=log, tb_writer=tb_writer, args=args, name=name)
+            env=env, log=log, tb_writer=tb_writer, args=args, name=name,
+            i_agent=i_agent)
 
         self.set_dim()
         self.set_policy()
@@ -40,12 +41,12 @@ class Agent(PolicyBase):
             action[np.random.randint(low=0, high=self.args.n_action, size=(1,))] = 1
 
             if self.epsilon > 0.05:
-                self.epsilon *= 0.9999  # Reduce epsilon over time
+                self.epsilon *= 0.999  # Reduce epsilon over time
 
         assert not np.isnan(action).any()
 
-        self.tb_writer.add_scalar(
-            "debug/epsilon", self.epsilon, total_timesteps)
+        self.tb_writer.add_scalars(
+            "debug/epsilon", {self.name: self.epsilon}, total_timesteps)
 
         return action
 

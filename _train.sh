@@ -31,5 +31,6 @@ python3.6 main.py \
 --env-name "Gridworld-v0" \
 --ep-max-timesteps 10 \
 --row 3 \
---col 11 \
+--col 5 \
+--n-agent 2 \
 --prefix ""

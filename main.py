@@ -7,10 +7,10 @@ from tensorboardX import SummaryWriter
 from trainer.train import train
 
 
-def set_policy(env, tb_writer, log, args, name):
+def set_policy(env, tb_writer, log, args, name, i_agent):
     if name == "agent":
         from policy.agent import Agent
-        policy = Agent(env=env, tb_writer=tb_writer, log=log, name=name, args=args)
+        policy = Agent(env=env, tb_writer=tb_writer, log=log, name=name, i_agent=i_agent, args=args)
     else:
         raise ValueError("Invalid name")
 
@@ -18,6 +18,9 @@ def set_policy(env, tb_writer, log, args, name):
 
 
 def main(args):
+    if args.central_train is True:
+        raise NotImplementedError("todo")
+
     # Create directories
     if not os.path.exists("./logs"):
         os.makedirs("./logs")
@@ -37,10 +40,12 @@ def main(args):
     np.random.seed(args.seed)
 
     # Initialize policy
-    agent = set_policy(env, tb_writer, log, args, name="agent")
+    agents = [
+        set_policy(env, tb_writer, log, args, name="agent", i_agent=i_agent)
+        for i_agent in range(args.n_agent)]
 
     # Start train
-    train(agent=agent, env=env, log=log, tb_writer=tb_writer, args=args)
+    train(agents=agents, env=env, log=log, tb_writer=tb_writer, args=args)
 
 
 if __name__ == "__main__":
@@ -57,10 +62,10 @@ if __name__ == "__main__":
         "--policy-freq", default=2, type=int,
         help="Frequency of delayed policy updates")
     parser.add_argument(
-        "--actor-lr", default=0.0001, type=float,
+        "--actor-lr", default=0.00005, type=float,
         help="Learning rate for actor")
     parser.add_argument(
-        "--critic-lr", default=0.001, type=float,
+        "--critic-lr", default=0.0005, type=float,
         help="Learning rate for critic")
     parser.add_argument(
         "--n-hidden", default=200, type=int,
@@ -68,6 +73,12 @@ if __name__ == "__main__":
     parser.add_argument(
         "--discount", default=0.99, type=float, 
         help="Discount factor")
+    parser.add_argument(
+        "--n-agent", default=1, type=int,
+        help="Number of agent")
+    parser.add_argument(
+        "--central-train", action='store_true',
+        help="Centralized training or not")
 
     # Env
     parser.add_argument(
@@ -97,6 +108,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Set log name
-    args.log_name = "env::%s_row::%s_col::%s_prefix::%s_log" % (args.env_name, args.row, args.col, args.prefix)
+    args.log_name = \
+        "env::%s_row::%s_col::%s_n_agent::%s_central_train::%s_prefix::%s_log" \
+        % (args.env_name, args.row, args.col, args.n_agent, args.central_train, args.prefix)
 
     main(args=args)

@@ -2,14 +2,14 @@ from policy.td3 import TD3
 
 
 class PolicyBase(object):
-    def __init__(self, env, log, tb_writer, args, name):
+    def __init__(self, env, log, tb_writer, args, name, i_agent):
         super(PolicyBase, self).__init__()
 
         self.env = env
         self.log = log
         self.tb_writer = tb_writer
         self.args = args
-        self.name = name
+        self.name = name + str(i_agent)
 
     def set_dim(self):
         raise NotImplementedError()
@@ -39,12 +39,3 @@ class PolicyBase(object):
     def load_weight(self, filename, directory="./pytorch_models"):
         self.log[self.args.log_name].info("[{}] Loaded weight".format(self.name))
         self.policy.load(filename, directory)
-
-    def set_eval_mode(self):
-        self.log[self.args.log_name].info("[{}] Set eval mode".format(self.name))
-
-        self.policy.actor.eval()
-        if "worker" not in self.name:
-            self.policy.actor_target.eval()
-            self.policy.critic.eval()
-            self.policy.critic_target.eval()

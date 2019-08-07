@@ -1,5 +1,5 @@
 # gumbel-rl-gridworld
-The use of Gumbel softmax for single-agent RL in a simple gridworld
+The use of Gumbel softmax for multi-agent RL in a simple gridworld
 
 ## Dependency
 Known dependencies are:
